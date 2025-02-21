@@ -1,0 +1,30 @@
+#!/usr/bin/expect
+
+set timeout 2
+
+spawn ./msh
+
+expect {
+    "$ " { 
+        send "cat | rev\r"
+        send "bartek\r"
+    }
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+}
+
+expect {
+    "ketrab\r" {
+        # Success, do nothing
+    }
+    timeout {
+        send_user "Error: timed out waiting for expected output\n"
+        exit 1
+    }
+    eof {
+        send_user "Error: unexpected EOF received\n"
+        exit 1
+    }
+}
