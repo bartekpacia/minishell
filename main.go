@@ -6,11 +6,28 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 )
 
+// Processes being currently executed.
+var cmds []*exec.Cmd = make([]*exec.Cmd, 0)
+
 func main() {
 	log.SetFlags(0)
+	log.SetPrefix("msh:")
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt)
+
+	go func() {
+		for sig := range sigChan {
+			log.Println("Interrupt signal received")
+			for _, cmd := range cmds {
+				cmd.Process.Signal(sig)
+			}
+		}
+	}()
 
 	if len(os.Args) == 1 {
 		runRepl()
@@ -37,7 +54,6 @@ func runRepl() {
 func execute(cmdline string) {
 	parts := strings.FieldsFunc(cmdline, splitter)
 
-	cmds := make([]*exec.Cmd, 0)
 	for _, part := range parts {
 		fields := strings.Fields(part)
 		if len(fields) == 0 {
@@ -50,6 +66,9 @@ func execute(cmdline string) {
 
 		cmds = append(cmds, newcmd)
 	}
+	defer func() {
+		cmds = cmds[:0]
+	}()
 
 	if len(cmds) == 1 {
 		// There is only a single program running. Connect its stdin, stdout, stderr to our own.
@@ -61,11 +80,12 @@ func execute(cmdline string) {
 
 		err := cmd.Start()
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("failed to start command %s: %v\n", cmd.Path, err)
+			return
 		}
 		err = cmd.Wait() // Correctly assign the error from cmd.Wait()
 		if err != nil {
-			log.Fatalln("failed to wait for command:", err)
+			log.Printf("failed to wait for command %s: %v\n", cmd.Path, err)
 		}
 
 		return
@@ -91,7 +111,7 @@ func execute(cmdline string) {
 	for _, cmd := range cmds {
 		err := cmd.Start()
 		if err != nil {
-			log.Fatalln(err)
+			log.Printf("failed to start command %s: %v\n", cmd.Path, err)
 		}
 	}
 
@@ -99,7 +119,7 @@ func execute(cmdline string) {
 	for _, cmd := range cmds {
 		err := cmd.Wait()
 		if err != nil {
-			log.Fatalln("failed to wait for command:", err)
+			log.Printf("failed to wait for command %s: %v\n", cmd.Path, err)
 		}
 	}
 }
