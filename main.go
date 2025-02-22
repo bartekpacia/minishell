@@ -15,7 +15,7 @@ var cmds []*exec.Cmd = make([]*exec.Cmd, 0)
 
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix("msh:")
+	log.SetPrefix("msh: ")
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
@@ -80,12 +80,12 @@ func execute(cmdline string) {
 
 		err := cmd.Start()
 		if err != nil {
-			log.Printf("failed to start command %s: %v\n", cmd.Path, err)
+			log.Printf("failed to start single command %s: %v\n", cmd.Path, err)
 			return
 		}
 		err = cmd.Wait() // Correctly assign the error from cmd.Wait()
 		if err != nil {
-			log.Printf("failed to wait for command %s: %v\n", cmd.Path, err)
+			log.Printf("failed to wait for single command %s: %v\n", cmd.Path, err)
 		}
 
 		return

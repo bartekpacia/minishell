@@ -1,0 +1,33 @@
+#!/usr/bin/expect
+
+set timeout 2
+
+spawn ./msh
+
+expect {
+    "$ " {}
+
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+
+    # TODO: handle eof?
+}
+
+send \x03
+
+expect {
+    "$ " {}
+
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+
+    # TODO: handle eof?
+}
+
+
+
+

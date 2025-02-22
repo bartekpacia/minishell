@@ -13,6 +13,10 @@ expect {
         send_user "Error: timed out waiting for shell prompt\n"
         exit 1
     }
+    eof {
+        send_user "Error: unexpected EOF received\n"
+        exit 1
+    }
 }
 
 expect {
