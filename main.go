@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -42,9 +43,12 @@ func main() {
 func runRepl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print("$ ")
+		fmt.Print("> ")
 		cmdline, err := reader.ReadString('\n')
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			log.Fatalln("scan", err)
 		}
 		execute(cmdline)
