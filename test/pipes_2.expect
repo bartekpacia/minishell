@@ -6,8 +6,9 @@ spawn ../msh
 
 expect {
     -exact ">" {
-        send "cat | rev\r"
-        send "bartek\r"
+        # The below works but requries the shell to handle quotes
+        # send "echo banana apple cherry apple | tr \" \" \"\\n\" | sort | uniq\r"
+        send "echo banana apple cherry apple | xargs -n 1 | sort | uniq\r"
     }
     timeout {
         send_user "Error: timed out waiting for shell prompt\n"
@@ -20,8 +21,8 @@ expect {
 }
 
 expect {
-    -exact "ketrab\r" {
-        send_user "Success: got \"ketrab\" which is the reverse of \"bartek\"\n"
+    -exact "apple\r\nbanana\r\ncherry\r\n" {
+        send_user "Success: got expected output\n"
         exit 0
     }
     timeout {
