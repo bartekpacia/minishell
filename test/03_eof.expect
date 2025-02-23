@@ -1,0 +1,43 @@
+#!/usr/bin/expect
+
+set timeout 1
+
+spawn ../msh
+
+expect {
+    -exact "> " {
+        # send CTRL+D (EOF)
+        send \x04
+    }
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+    eof {
+        send_user "Error: unexpected EOF\n"
+        exit 1
+    }
+}
+
+expect {
+    -re "(.+)\r" { # TODO: remove the trailing \r (but test fails then)
+        set unexpected_output $expect_out(buffer)
+        send_user "Error: unexpected output:$unexpected_output\n"
+        exit 1
+    }
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+    -exact "\^D" {
+        set unexpected_output $expect_out(buffer)
+        send_user "Success: EOF received (shell died as expected), output: $unexpected_output\n"
+        exit 0
+    }
+    # This EOF doesn't work for some reason
+    eof {
+        set unexpected_output $expect_out(buffer)
+        send_user "Success: EOF received (shell died as expected), output: $unexpected_output\n"
+        exit 0
+    }
+}

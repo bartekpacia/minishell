@@ -1,0 +1,36 @@
+#!/usr/bin/expect
+
+set timeout 1
+
+spawn ../msh
+
+expect {
+    -exact ">" {
+        # The below works but requries the shell to handle quotes
+        # send "echo banana apple cherry apple | tr \" \" \"\\n\" | sort | uniq\r"
+        send "echo banana apple cherry apple | xargs -n 1 | sort | uniq\r"
+    }
+    timeout {
+        send_user "Error: timed out waiting for shell prompt\n"
+        exit 1
+    }
+    eof {
+        send_user "Error: unexpected EOF\n"
+        exit 1
+    }
+}
+
+expect {
+    -exact "apple\r\nbanana\r\ncherry\r\n" {
+        send_user "Success: got expected output\n"
+        exit 0
+    }
+    timeout {
+        send_user "Error: timed out waiting for expected output\n"
+        exit 1
+    }
+    eof {
+        send_user "Error: unexpected EOF received\n"
+        exit 1
+    }
+}

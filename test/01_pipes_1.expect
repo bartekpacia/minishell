@@ -1,11 +1,11 @@
 #!/usr/bin/expect
 
-set timeout 2
+set timeout 1
 
-spawn ./msh
+spawn ../msh
 
 expect {
-    "$ " { 
+    -exact ">" {
         send "cat | rev\r"
         send "bartek\r"
     }
@@ -13,11 +13,16 @@ expect {
         send_user "Error: timed out waiting for shell prompt\n"
         exit 1
     }
+    eof {
+        send_user "Error: unexpected EOF\n"
+        exit 1
+    }
 }
 
 expect {
-    "ketrab\r" {
-        # Success, do nothing
+    -exact "ketrab\r" {
+        send_user "Success: got \"ketrab\" which is the reverse of \"bartek\"\n"
+        exit 0
     }
     timeout {
         send_user "Error: timed out waiting for expected output\n"
