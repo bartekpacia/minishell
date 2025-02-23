@@ -66,34 +66,6 @@ func execute(cmdline string) {
 		cmdname := strings.Fields(part)[0]
 		args := strings.Fields(part)[1:]
 
-		/*
-
-			// Unquote
-			for i, arg := range args {
-				if arg == "\"" {
-					// Find the next quote
-					for j := i + 1; j < len(args); j++ {
-						if args[j] == "\"" {
-							args[i] = strings.Join(args[i:j+1], " ")
-							args = append(args[:i+1], args[j+1:]...)
-							break
-						}
-					}
-				}
-
-				// if strings.HasPrefix(arg, "\"") && strings.HasSuffix(arg, "\"") {
-				// 	oldarg := arg
-				// 	args[i] = strings.Trim(arg, "\"")
-				// 	fmt.Printf("idx %d: arg is %s, oldarg %0x into %0x\n", i, oldarg, []byte(oldarg), []byte(args[i]))
-				// }
-
-				// if arg == "\\\n" {
-				// 	args[i] = "\n"
-				// }
-			}
-
-		*/
-
 		newcmd := exec.Command(cmdname, args...)
 
 		cmds = append(cmds, newcmd)
