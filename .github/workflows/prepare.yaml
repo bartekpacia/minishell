@@ -14,7 +14,7 @@ jobs:
 
       - name: Set up Expect
         run: sudo apt-get install -y expect
-      
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -24,4 +24,9 @@ jobs:
         run: go build -o msh .
 
       - name: Run expect tests
-        run: ./test.expect
+        run: |
+          cd ./test
+          for testfile in *.expect; do
+            echo "==> Running test $testfile"
+            ./$testfile
+          done

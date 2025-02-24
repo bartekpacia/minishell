@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -15,7 +16,7 @@ var cmds []*exec.Cmd = make([]*exec.Cmd, 0)
 
 func main() {
 	log.SetFlags(0)
-	log.SetPrefix("msh:")
+	log.SetPrefix("msh: ")
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
@@ -42,9 +43,12 @@ func main() {
 func runRepl() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print("$ ")
+		fmt.Print("> ")
 		cmdline, err := reader.ReadString('\n')
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			log.Fatalln("scan", err)
 		}
 		execute(cmdline)
@@ -80,12 +84,12 @@ func execute(cmdline string) {
 
 		err := cmd.Start()
 		if err != nil {
-			log.Printf("failed to start command %s: %v\n", cmd.Path, err)
+			log.Printf("failed to start single command %s: %v\n", cmd.Path, err)
 			return
 		}
 		err = cmd.Wait() // Correctly assign the error from cmd.Wait()
 		if err != nil {
-			log.Printf("failed to wait for command %s: %v\n", cmd.Path, err)
+			log.Printf("failed to wait for single command %s: %v\n", cmd.Path, err)
 		}
 
 		return
